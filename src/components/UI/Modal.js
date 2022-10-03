@@ -64,6 +64,7 @@ const ModalOverlay = (props) => {
             name="email"
             placeholder="Email"
             ref={emailInput}
+            className={classes.input}
           />
           <input
             type="password"
@@ -71,6 +72,7 @@ const ModalOverlay = (props) => {
             name="password"
             placeholder="Password"
             ref={passwordInput}
+            className={classes.input}
           />
         </div>
         <Button type="submit" status={status}></Button>

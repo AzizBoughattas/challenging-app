@@ -93,11 +93,11 @@ const Profile = (props) => {
           </div>
           <div className={classes.cordonne}>
             <p>
-              My Email : <input value={props.data.email} readOnly />
+              My Email : <input className={classes.input} value={props.data.email} readOnly />
             </p>
             <p>
               My Password :
-              <input type="password" value={props.data.password} readOnly />
+              <input className={classes.input} type="password" value={props.data.password} readOnly />
             </p>
             <button className={classes.button}>Change my password ?</button>
           </div>

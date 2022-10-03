@@ -1,8 +1,8 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { modalActions } from "../../store/modal";
-import {GrNotification} from "react-icons/gr"
-import {GrLogout} from "react-icons/gr"
+import {MdCircleNotifications} from "react-icons/md"
+import {RiLogoutBoxRLine} from "react-icons/ri"
 import classes from "./Navigation.module.css";
 import { authActions } from "../../store/auth";
 import { Link } from "react-router-dom";
@@ -40,13 +40,13 @@ const Navigation = (props) => {
         ) : (
           <nav >
             <div className={classes.dropdown}>
-            <button className={classes.dropbtn}><GrNotification className={classes.icon}/></button>
+            <button className={classes.dropbtn}><MdCircleNotifications className={classes.icon}/></button>
             <div className={classes['dropdown-content']}>
               <Link to="/user-profile">My Profile</Link>
               <Link to="/quiz">Quiz</Link>
             </div>
             </div>
-            <button className={classes.logout} onClick={logout}><GrLogout className={classes.icon}/></button>
+            <button className={classes.logout} onClick={logout}><RiLogoutBoxRLine className={classes.icon}/></button>
           </nav>
         )}
       </nav>

@@ -18,7 +18,7 @@
   }
   
   .header {
-    background: #4f005f;
+    background: #474747;
     padding: 1rem;
   }
   
@@ -35,14 +35,14 @@
   }
 
   .content p {
-    background: var(--color-bg-variant);
+    background: #d1d0d0;
     padding: 1.2rem;
     border-radius: 2rem;
-    border: 3px solid #4f005f;
+    border: 3px solid #474747;
     font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   }
 
-  input {
+  .input {
     width: 95%;
     padding: 1rem;
     margin: 0 0 1rem 1rem;
