@@ -4,6 +4,8 @@
 /node_modules
 /.pnp
 .pnp.js
+/challenging-app-backend/node_modules
+/challenging-app-backend/config
 
 # testing
 /coverage

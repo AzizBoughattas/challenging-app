@@ -42,8 +42,12 @@
     font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   }
 
+  .inputing {
+    text-align: center;
+  }
+
   .input {
-    width: 95%;
+    width: 40%;
     padding: 1rem;
     margin: 0 0 1rem 1rem;
     background-color: rgb(219, 219, 219);
