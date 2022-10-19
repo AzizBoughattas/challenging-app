@@ -1,46 +1,88 @@
-import { Fragment, useState } from "react";
+import axios from "axios";
+import { Fragment, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Route } from "react-router-dom";
+import { Redirect, Route, Switch } from "react-router-dom";
+import Admin from "./components/admin/Admin";
 import Home from "./components/home/Home";
 import Layout from "./components/navigation/Layout";
 import Profile from "./components/profile/Profile";
 import Quiz from "./components/quiz/Quiz";
 import Modal from "./components/UI/Modal";
-
+import Notification from "./components/UI/Notification";
+import { authActions } from "./store/auth";
 
 function App() {
   const modal = useSelector((state) => state.modal.modalShow);
-  const [data,setData] = useState({})
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const token = useSelector((state) => state.auth.token);
+  const isAdmin = useSelector((state) => state.auth.isAdmin);
+  const notification = useSelector((state) => state.ui.notification);
+  const dispatch = useDispatch();
 
-  const myInput = (email,password) => {
-    console.log(email)
-    setData({password:password,email:email})
-  }
+  axios.defaults.headers.common["Authorization"] = token;
+  axios.defaults.headers.common["Content-Type"] = "application/json";
+
+
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      setTimeout(() => {
+        dispatch(authActions.logout());
+        console.log("logout");
+      }, 10800000);
+    }
+  }, [dispatch, isAuthenticated]);
 
   return (
     <Fragment>
-      <Route path="/" exact>
-      <Layout>
-          <main>
-            <Home />
-          </main>
-        </Layout>
-      </Route>
-      {<Route path="/user-profile" exact>
-      <Layout>
-          <main>
-            <Profile data={data}/>
-          </main>
-        </Layout>
-      </Route>}
-      {<Route path="/quiz" exact>
-      <Layout>
-          <main>
-            <Quiz />
-          </main>
-        </Layout>
-      </Route>}
-      {modal && <Modal myInput={myInput}/>}
+      {notification && (
+        <Notification
+          status={notification.status}
+          message={notification.message}
+          title={notification.title}
+        />
+      )}
+      <Switch>
+        <Route path="/" exact>
+          <Layout>
+            <main>
+              <Home />
+            </main>
+          </Layout>
+        </Route>
+        {isAuthenticated && (
+          <Route path="/user-profile">
+            <Layout>
+              <main>
+                <Profile />
+              </main>
+            </Layout>
+          </Route>
+        )}
+        {isAuthenticated && (
+          <Route path="/quiz">
+            <Layout>
+              <main>
+                <Quiz />
+              </main>
+            </Layout>
+          </Route>
+        )}
+        {isAdmin && (
+          <Route path="/admin">
+            <Layout>
+              <main>
+                <Admin notification={notification}/>
+              </main>
+            </Layout>
+          </Route>
+        )}
+        <Route path="*">
+          <Redirect to="/" />
+        </Route>
+      </Switch>
+
+      {modal && <Modal />}
     </Fragment>
   );
 }

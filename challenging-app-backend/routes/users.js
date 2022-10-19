@@ -2,7 +2,7 @@ const { User, validateUser } = require("../models/user");
 const express = require("express");
 const router = express.Router();
 const bcrypt = require('bcrypt')
-const auth= require('../middleware/auth')
+const admin = require('../middleware/admin')
 
 router.post("/", async (req, res) => {
   const { error } = validateUser(req.body);
@@ -23,13 +23,16 @@ router.post("/", async (req, res) => {
   const token = user.generateAuthToken()
 
   await user.save();
-  res.send({user :user,token: 'Bearer '+token});
+  res.send({email:user.email,isAdmin:user.isAdmin,nickname:user.nickname,token:token});
 });
 
-router.get("/",auth,async(req,res) => {
-  const user = await User.find()
+router.get("/",admin,async(req,res) => {
+  const user = await User.find().select('nickname -_id')
+  console.log('okey')
   res.send(user)
 })
+
+
 
 
 

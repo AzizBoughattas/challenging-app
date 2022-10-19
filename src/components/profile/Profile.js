@@ -12,6 +12,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
+import { useSelector } from "react-redux";
 
 const DUMMY_DATA = [
   { titre: "java", note: 33 },
@@ -54,6 +55,9 @@ const DUMMY_DATA2 = [
 const Profile = (props) => {
   const [file, setFile] = useState("");
   const [image, setImage] = useState("");
+  const email = useSelector((state) => state.auth.email)
+
+  console.log(email)
 
   useEffect(() => {
     if (file) {
@@ -93,11 +97,11 @@ const Profile = (props) => {
           </div>
           <div className={classes.cordonne}>
             <p>
-              My Email : <input className={classes.input} value={props.data.email} readOnly />
+              My Email : <input className={classes.input} value={email} readOnly />
             </p>
             <p>
               My Password :
-              <input className={classes.input} type="password" value={props.data.password} readOnly />
+              <input className={classes.input} type="password" value={email} readOnly />
             </p>
             <button className={classes.button}>Change my password ?</button>
           </div>
@@ -136,7 +140,7 @@ const Profile = (props) => {
             <div className={classes.rank}>
               <p>My Rank</p>
               <div className={classes.progressBar}>
-              {DUMMY_DATA2.map((data) => <Fragment><p style={{display:"inline"}}>{data.name}:{data.value}%</p><progress value={data.value} max="100">aa</progress></Fragment>)}
+              {DUMMY_DATA2.map((data,index) => <Fragment key={index} ><p style={{display:"inline"}}>{data.name}:{data.value}%</p><progress value={data.value} max="100">aa</progress></Fragment>)}
               </div>
             </div>
           </div>

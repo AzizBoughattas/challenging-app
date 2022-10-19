@@ -11,6 +11,8 @@ const schema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, minlength: 5 },
   password: { type: String, required: true, minLength: 5 },
   isAdmin: {type:Boolean,default:false},
+  notes: {type:Array},
+  quiz:{type:Array}
 });
 schema.methods.generateAuthToken = function() {
     const token = jwt.sign({ _id: this._id, isAdmin:this.isAdmin },process.env.JWT_SECRET,{expiresIn:"3h"});

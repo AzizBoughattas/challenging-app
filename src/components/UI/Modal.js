@@ -4,10 +4,10 @@ import Button from "./Button";
 import ReactDOM from "react-dom";
 import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { authActions } from "../../store/auth";
 import { useHistory } from "react-router-dom";
 import { modalActions } from "../../store/modal";
-import { sendCordinate } from "../../store/auth-actions";
+import { LoggingIn, Register } from "../../store/auth-actions";
+import { uiActions } from "../../store/ui-actions";
 
 var validRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
@@ -16,16 +16,20 @@ const Backdrop = (props) => {
 
   const hideModal = () => {
     dispatch(modalActions.closeModal());
+    dispatch(uiActions.hideErrorNotification())
   };
   return <div className={classes.backdrop} onClick={hideModal} />;
 };
 
 const ModalOverlay = (props) => {
   const [checkInput, setCheckInput] = useState(true);
-  const emailInput = useRef();
-  const passwordInput = useRef();
-  const nicknameInput = useRef();
+  const emailRef = useRef();
+  const passwordRef = useRef();
+  const nicknameRef = useRef();
   const dispatch = useDispatch();
+  const notification = useSelector((state) => state.ui.notification)
+
+
   const googleContent = useSelector(
     (state) => state.modal.modalInfo.googleContent
   );
@@ -38,29 +42,43 @@ const ModalOverlay = (props) => {
 
   const formHandler = (event) => {
     event.preventDefault();
+    let emailInput = emailRef.current.value;
+    let passwordInput = passwordRef.current.value;
 
-    setCheckInput(
-      emailInput.current.value.match(validRegex) &&
-        passwordInput.current.value.trim().length >= 6 &&
-        passwordInput.current.value.length > 5
-    );
-
-    if (checkInput) {
-      props.myInput(
-        emailInput.current.value,
-        passwordInput.current.value,
-        nicknameInput.current.value
-      );
-      dispatch(
-        sendCordinate({
-          email: emailInput.current.value,
-          password: passwordInput.current.value,
-          nickname:nicknameInput.current.value
-        })
-      );
-      // dispatch(authActions.login());
-      // dispatch(modalActions.closeModal());
-      // navigate.replace("/");
+    if (status === "Sign in") {
+      if (emailInput.match(validRegex) && passwordInput.trim().length >= 6) {
+        setCheckInput(true);
+        console.log("LoggingIn");
+        dispatch(
+          LoggingIn({
+            email: emailInput,
+            password: passwordInput,
+          })
+        );
+        navigate.replace("/");
+      } else {
+        setCheckInput(false);
+      }
+    } else {
+      let nicknameInput = nicknameRef.current.value;
+      if (
+        emailInput.match(validRegex) &&
+        passwordInput.trim().length >= 6 &&
+        nicknameInput.length >= 5
+      ) {
+        setCheckInput(true);
+        console.log("Registering");
+        dispatch(
+          Register({
+            nickname: nicknameInput,
+            email: emailInput,
+            password: passwordInput,
+          })
+        );
+        navigate.replace("/");
+      } else {
+        setCheckInput(false);
+      }
     }
   };
 
@@ -75,20 +93,22 @@ const ModalOverlay = (props) => {
       </div>
       <form onSubmit={formHandler}>
         <div className={classes.inputing}>
-          <input
-            type="text"
-            required
-            name="nickname"
-            placeholder="Nickname"
-            ref={nicknameInput}
-            className={classes.input}
-          />
+          {status === "Sign up" && (
+            <input
+              type="text"
+              required
+              name="nickname"
+              placeholder="Nickname"
+              ref={nicknameRef}
+              className={classes.input}
+            />
+          )}
           <input
             type="email"
             required
             name="email"
             placeholder="Email"
-            ref={emailInput}
+            ref={emailRef}
             className={classes.input}
           />
           <input
@@ -96,11 +116,11 @@ const ModalOverlay = (props) => {
             required
             name="password"
             placeholder="Password"
-            ref={passwordInput}
+            ref={passwordRef}
             className={classes.input}
           />
         </div>
-        {!checkInput && <p>fama mochkl</p>}
+        {notification && <div className={classes.error}><p>{notification.message}</p></div>}
         <Button type="submit" status={status}></Button>
       </form>
       <footer className={classes.actions}>forget password</footer>

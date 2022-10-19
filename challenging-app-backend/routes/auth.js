@@ -18,6 +18,7 @@ router.post("/",async(req,res) => {
   
   
     res.send({email:user.email,isAdmin:user.isAdmin,nickname:user.nickname,token:token});
+    console.log("connecta")
   })
   
   function validate(user) {

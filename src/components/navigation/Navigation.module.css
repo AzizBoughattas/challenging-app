@@ -105,11 +105,12 @@
   font-size: 2rem;
   margin-left: 2rem;
   font-family: 'Pacifico', cursive;
+  display: inline-block;
 }
 
 .logo > img {
   width: 2.8rem;
   position: absolute;
-  top: 0.7rem;
   margin-left: 0.7rem;
+  margin-top: 0.3rem;
 }

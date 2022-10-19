@@ -2,9 +2,13 @@ const mongoose = require("mongoose");
 const express = require("express");
 const app = express();
 const user = require("./routes/users");
+const quiz= require("./routes/quiz");
 const auth = require("./routes/auth");
 const cors = require('cors')
 require('dotenv').config({path:"./config/dev.env"})
+
+
+
 mongoose
   .connect("mongodb://localhost/challenge-app")
   .then(() => console.log("Connected to MongoDB..."))
@@ -23,6 +27,7 @@ app.use(cors())
 
 app.use("/api/users", user);
 app.use("/api/auth", auth);
+app.use("/api/quiz", quiz);
 
 
 

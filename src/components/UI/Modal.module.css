@@ -59,6 +59,13 @@
     display: flex;
     justify-content:center;
   }
+  .error {
+    text-align: center;
+  }
+  .error p {
+    font-weight: 900;
+    color: rgb(255, 43, 43);
+  }
   
   @media (min-width: 768px) {
     .modal {
