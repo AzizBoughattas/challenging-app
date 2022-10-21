@@ -3,6 +3,8 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require('bcrypt')
 const admin = require('../middleware/admin')
+const jwt = require("jsonwebtoken");
+const auth = require('../middleware/auth')
 
 router.post("/", async (req, res) => {
   const { error } = validateUser(req.body);
@@ -27,8 +29,13 @@ router.post("/", async (req, res) => {
 });
 
 router.get("/",admin,async(req,res) => {
-  const user = await User.find().select('nickname -_id')
-  console.log('okey')
+  const user = await User.find()
+  res.send(user)
+})
+router.get("/me",auth,async(req,res) => {
+  const token = req.header("Authorization")
+  const payload = jwt.decode(token)
+  const user = await User.findOne({ _id :payload._id })
   res.send(user)
 })
 

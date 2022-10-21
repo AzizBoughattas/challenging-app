@@ -1,79 +1,66 @@
 import { useEffect, useRef, useState } from "react";
 import classes from "./Quiz.module.css";
-import image2 from "../../images/coding.jpg";
-import { useHistory } from "react-router-dom";
-
-
-const DUMMY_QUESTIONS = [
-  {
-    answers: [],
-    type: "textarea",
-    question: "chneya result taa hedhi",
-    image: image2,
-  },
-  {
-    answers: ["react", "angular", "vue"],
-    type: "checkbox",
-    question: "akwa wehed",
-    image: "",
-  },
-  {
-    answers: [],
-    type: "textarea",
-    question: "ki nekteb haka chneya resultat",
-    image: "",
-  },
-];
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import { quizAnswers } from "../../store/quiz-actions";
 
 const Quiz = () => {
   const [isActive, setActive] = useState(false);
   const [counter, setCounter] = useState(0);
-  const [checked, setChecked] = useState([]);
-  const [doneCheck,setDoneCheck] = useState(false)
-  const history = useHistory()
+  const [answers, setAnswers] = useState([]);
+  const [questions, setQuestions] = useState([]);
+  const [doneCheck, setDoneCheck] = useState(false);
+  const [cardName, setCardName] = useState();
+  const [subject, setSubject] = useState();
+  const dispatch = useDispatch();
+  const nickname = useSelector((state) => state.auth.nickname);
+  const notification = useSelector((state) => {
+
+    return state.ui.notification;
+  });
   const checkboxInput = useRef([]);
   const textareaInput = useRef();
 
   useEffect(() => {
-    if(doneCheck) {
-     setTimeout(() => {
-      history.replace("/user-profile")
-     }, 3000);
-    }
-  },[doneCheck,history])
+    axios.get("http://localhost:8080/api/quiz").then((res) => {
+      setQuestions(res.data.questions);
+      setSubject(res.data.subject);
+    });
+  }, []);
 
   const toggleHandler = () => {
     setActive(true);
   };
 
-  const handleCheck = (event) => {
-    var updatedList = [...checked]
-    if (event.target.checked) {
-      updatedList = [...checked, event.target.value];
+  const handleChange = (event, question) => {
+    const newState = [...answers];
+    if (cardName === question) {
+      newState[newState.length === 0 ? 0 : newState.length - 1] =
+        event.target.value;
+      setAnswers(newState);
     } else {
-      updatedList.splice(checked.indexOf(event.target.value), 1);
+      setCardName(question);
+      setAnswers((state) => [...state, event.target.value]);
     }
-    setChecked(updatedList);
-  }
+  };
 
   const formHandler = (event) => {
     event.preventDefault();
+    console.log(answers);
 
-    if(DUMMY_QUESTIONS.length -1 >counter) {
-      // console.log(DUMMY_QUESTIONS.length)
-      // console.log(checked);
-      // console.log(textareaInput.current.value);
-      console.log(DUMMY_QUESTIONS.length -1)
-      console.log(counter)
-  
+    if (questions.length - 1 > counter) {
       setCounter((state) => state + 1);
     } else {
+      const data = {
+        subject: subject,
+        userAnswers: answers,
+        nickname: nickname,
+      };
+      console.log(data);
+      dispatch(quizAnswers(data));
       setCounter((state) => state + 1);
-      setDoneCheck(true)
-      console.log(doneCheck)
+      setDoneCheck(true);
     }
-
-
   };
 
   return (
@@ -82,38 +69,54 @@ const Quiz = () => {
         {!isActive && (
           <div>
             <p>
-              Hi Aziz125, so you have a quiz in Java . Click on Start whenever
-              you re ready . Good Luck !
+              Hi {nickname}, so you have a quiz in {subject} . Click on Start
+              whenever you re ready . Good Luck !
             </p>
             <button className={classes.button} onClick={toggleHandler}>
               Start
             </button>
           </div>
         )}
-          {doneCheck && <p>Well done Aziz125 ! you completed the quiz successfully , you can check your results in your profile</p>}
+        {doneCheck && (
+          <p>
+            Well done {nickname} ! you completed the quiz successfully , you can
+            check your results in your profile
+          </p>
+        )}
 
-        {(isActive && DUMMY_QUESTIONS.length -1 >= counter) ? <div className={classes.question}>
-          <p>Question {counter +1} : {DUMMY_QUESTIONS[counter].question}</p>
-          {DUMMY_QUESTIONS[counter].image && <img src={DUMMY_QUESTIONS[counter].image} alt="screenshot" />}
-          </div> : "" }
+
+        {isActive && questions.length - 1 >= counter ? (
+          <div className={classes.question}>
+            <p>
+              Question {counter + 1} : {questions[counter].question}
+            </p>
+            {questions[counter].image && (
+              <img src={questions[counter].image} alt="screenshot" />
+            )}
+          </div>
+        ) : (
+          ""
+        )}
       </div>
-      {(isActive && DUMMY_QUESTIONS.length -1 >= counter) ? (
+      {isActive && questions.length - 1 >= counter ? (
         <div className={classes["answers-container"]}>
           <form className={classes.form} onSubmit={formHandler}>
-            {DUMMY_QUESTIONS[counter].type === "checkbox" &&
-              DUMMY_QUESTIONS[counter].answers.map((item,index) => (
+            {questions[counter].answers.length !== 0 &&
+              questions[counter].answers.map((item, index) => (
                 <div className={classes.checkbox} key={index}>
                   <input
-                    type="checkbox"
-                    name="checkbox"
+                    type="radio"
+                    name="radio"
                     value={item}
                     ref={checkboxInput}
-                    onChange={handleCheck}
+                    onChange={(e) =>
+                      handleChange(e, questions[counter].question)
+                    }
                   />
-                  <label htmlFor="checkbox">{item}</label>
+                  <label htmlFor="radio">{item}</label>
                 </div>
               ))}
-            {DUMMY_QUESTIONS[counter].type === "textarea" && (
+            {questions[counter].answers.length === 0 && (
               <div>
                 <label htmlFor="texting">Write your response</label>
                 <textarea
@@ -121,14 +124,21 @@ const Quiz = () => {
                   rows="5"
                   ref={textareaInput}
                   className={classes.textarea}
+                  onChange={(e) => handleChange(e, questions[counter].question)}
                 ></textarea>
               </div>
             )}
 
-            <button className={classes.button}>{DUMMY_QUESTIONS.length -1 !== counter ? "Next question" : "Submit Quiz"}</button>
+            <button className={classes.button}>
+              {questions.length - 1 !== counter
+                ? "Next question"
+                : "Submit Quiz"}
+            </button>
           </form>
         </div>
-      ) : ""}
+      ) : (
+        ""
+      )}
     </div>
   );
 };

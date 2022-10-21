@@ -69,3 +69,44 @@ export const createQuiz = (data) => {
     //   }
   };
 };
+
+export const quizAnswers = (data) => {
+    return async (dispatch) => {
+      console.log(data);
+      const sendRequest = async () => {
+        return axios.post("http://localhost:8080/api/quiz/answer", data);
+      };
+
+      try {
+        dispatch(
+          uiActions.showNotification({
+            status: "loading",
+            title: "Loading!",
+            message: "isLoading",
+          })
+        );
+        await sendRequest();
+        dispatch(
+          uiActions.showNotification({
+            status: "success",
+            title: "Success!",
+            message: "your answers are sent successfully",
+          })
+        );
+         setTimeout(() => {
+          dispatch(uiActions.hideNotification())
+        }, 2000)
+      } catch (error) {
+        dispatch(
+          uiActions.showNotification({
+            status: "error",
+            title: "Error",
+            message: "failed sending your answers",
+          })
+        );
+        setTimeout(() => {
+          dispatch(uiActions.hideNotification())
+        }, 2000)
+      }
+    }
+}

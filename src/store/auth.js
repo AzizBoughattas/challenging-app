@@ -14,7 +14,7 @@ const authSlice = createSlice({
   initialState: {
     token:localStorage.getItem("userData") ? JSON.parse(localStorage.getItem("userData")).token : "",
     email: localStorage.getItem("userData") ? JSON.parse(localStorage.getItem("userData")).email : "" ,
-    nickname: "",
+    nickname: localStorage.getItem("userData") ? JSON.parse(localStorage.getItem("userData")).nickname : "",
     isAdmin: localStorage.getItem("userData") ? JSON.parse(localStorage.getItem("userData")).isAdmin : false,
     isAuthenticated: localStorage.getItem("userData") ? true : false,
     inputValidity: false,

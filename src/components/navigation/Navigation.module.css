@@ -114,3 +114,22 @@
   margin-left: 0.7rem;
   margin-top: 0.3rem;
 }
+
+.badge {
+  background-color: rgb(243, 36, 36);
+  padding: 6px 8px 6px 8px;
+  border-radius: 100%;
+  font-weight: bold;
+  color: white;
+}
+
+.notif {
+  background-color: rgb(243, 36, 36);
+  padding: 0.25rem 1rem;
+  border-radius: 25px;
+  color: white;
+}
+
+.disabled-link {
+  pointer-events: none;
+}

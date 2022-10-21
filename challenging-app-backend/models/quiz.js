@@ -4,7 +4,7 @@ const Joi = require("joi");
 const schema = new mongoose.Schema({
   subject: { type: String, required: true,unique:true },
   user: [{
-    userId: {type:mongoose.Schema.Types.ObjectId, ref:"User"},
+    nickname: {type:String},
     note: { type: Number },
     userAnswers: {type:Array}
   }],

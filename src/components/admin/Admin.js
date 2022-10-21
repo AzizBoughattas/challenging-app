@@ -7,16 +7,21 @@ import Select from "react-select";
 import axios from "axios";
 import { createQuiz } from "../../store/quiz-actions";
 
-
-
-
 const Admin = (props) => {
   function fetchData() {
     axios.get("http://localhost:8080/api/users").then((response) => {
       setUsers(
-        response.data.map((item) => {
-          return { value: item.nickname, label: item.nickname };
-        })
+        response.data
+          .filter((item) => {
+            if (item.quiz.length !== 0) {
+              return false;
+            } else {
+              return true;
+            }
+          })
+          .map((item) => {
+            return { value: item.nickname, label: item.nickname };
+          })
       );
     });
   }
@@ -32,7 +37,6 @@ const Admin = (props) => {
   const [selectedOption, setSelectedOption] = useState([]);
   const subjectRef = useRef();
 
-
   const [userSelect, setUserSelect] = useState(true);
   const [questionIsValid, setQuestionIsValid] = useState(true);
   const [imageIsValid, setImageIsValid] = useState(true);
@@ -40,12 +44,10 @@ const Admin = (props) => {
   const [subjectIsValid, setSubjectIsValid] = useState(true);
   const [questions, setQuestions] = useState([]);
 
-
   const questionInputRef = useRef();
   const imageInputRef = useRef();
   const rightAnswerRef = useRef();
   const dispatch = useDispatch();
-
 
   const validateQuiz = async () => {
     const subjectInput = subjectRef.current.value;
@@ -123,13 +125,13 @@ const Admin = (props) => {
   };
 
   const toggleContainer = (e) => {
-    if(e.target.name==="cancel") {
+    if (e.target.name === "cancel") {
       setToggleQuiz((state) => !state);
-      setToggleHandler(false)
-      setSelectedOption([])
-    }else { setToggleQuiz((state) => !state);}
-   
-
+      setToggleHandler(false);
+      setSelectedOption([]);
+    } else {
+      setToggleQuiz((state) => !state);
+    }
   };
 
   const formHandler = async (event) => {
@@ -145,7 +147,6 @@ const Admin = (props) => {
       rightAnswer,
     };
 
-
     const questions = await validateInput(inputValidation);
 
     console.log(questions);
@@ -160,6 +161,7 @@ const Admin = (props) => {
         imageInputRef.current.value = "";
         rightAnswerRef.current.value = "";
         setImageUrl(false);
+        setPropositions([])
         setCounter(0);
         return;
       } else {
@@ -182,10 +184,10 @@ const Admin = (props) => {
         userNickname: selectedOption.map((item) => item["value"]),
         questions: questions,
       };
-      dispatch(createQuiz(quiz))
+      dispatch(createQuiz(quiz));
       setToggleQuiz((state) => !state);
-      setToggleHandler(false)
-      setSelectedOption([])
+      setToggleHandler(false);
+      setSelectedOption([]);
     }
   };
 
@@ -195,12 +197,20 @@ const Admin = (props) => {
         <div>
           <p>Validate developers coding skills by creating a quiz !</p>
           {!toggleQuiz && (
-            <button className={classes.button} onClick={toggleContainer} name="start">
+            <button
+              className={classes.button}
+              onClick={toggleContainer}
+              name="start"
+            >
               Start
             </button>
           )}
           {toggleQuiz && (
-            <button className={classes.button} onClick={toggleContainer} name="cancel">
+            <button
+              className={classes.button}
+              onClick={toggleContainer}
+              name="cancel"
+            >
               Cancel
             </button>
           )}
@@ -211,7 +221,7 @@ const Admin = (props) => {
         <div className={classes["right-container"]}>
           {!toggleHandler && (
             <form className={classes.form} onSubmit={formHandler}>
-              <label htmlFor="question">Question 1 of the quiz</label>
+              <label htmlFor="question">Question </label>
               <input
                 name="question"
                 type="text"

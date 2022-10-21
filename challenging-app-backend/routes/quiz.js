@@ -4,6 +4,8 @@ const express = require("express");
 const router = express.Router();
 const auth = require("../middleware/auth");
 const admin =require('../middleware/admin')
+const sendEmail = require('../email/email')
+const jwt = require("jsonwebtoken");
 
 
 async function checkUser(nicknames) {
@@ -20,6 +22,7 @@ router.post("/create",admin, async (req, res) => {
   const { error } = validateQuiz(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
+  let userEmail = []
   if (req.body.userNickname.length !== 0) {
     const check = await checkUser(req.body.userNickname);
 
@@ -36,6 +39,7 @@ router.post("/create",admin, async (req, res) => {
               .status(400)
               .send(`sorry this user ${nickname} is already register in this quiz`);
           } else {
+            userEmail.push(user.email)
             user.quiz.push(req.body.subject);
             users[index].save();
             return;
@@ -43,6 +47,12 @@ router.post("/create",admin, async (req, res) => {
         }
       });
     });
+  }
+  
+  try {
+    await sendEmail(userEmail)
+  } catch (error) {
+    console.log(error)
   }
 
   let quiz = new Quiz({
@@ -64,13 +74,13 @@ router.post("/answer",auth, async (req, res) => {
   let quiz = await Quiz.find({ subject: req.body.subject });
   
   if (quiz.length === 0) return res.status(400).send("Subject not found ");
-  let user = await User.findById(req.body.userId);
+  let user = await User.findOne({nickname: req.body.nickname});
   if (!user) return res.status(400).send("User not found");
   if(user.quiz.indexOf(req.body.subject) === -1) return res.status(400).send("this User is not concerned about this quiz");
 
 
   const found = quiz[0].user.filter(
-    (item) => item.userId.toString() === req.body.userId
+    (item) => item.nickname.toString() === req.body.nickname
   );
   if (found.length > 0)
     return res.status(400).send("sorry you already passed the quiz ");
@@ -85,7 +95,7 @@ router.post("/answer",auth, async (req, res) => {
   console.log(note)
 
   const userResponse = {
-    userId: req.body.userId,
+    nickname: req.body.nickname,
     userAnswers: req.body.userAnswers,
     note: note,
   };
@@ -100,5 +110,21 @@ router.post("/answer",auth, async (req, res) => {
 
   res.send(quiz);
 });
+
+router.get("/",auth, async (req, res)=> {
+  const token = req.header("Authorization")
+  const payload = jwt.decode(token)
+  const user = await User.findOne({ _id :payload._id })
+
+  if(user.quiz.length!==0) {
+    const quiz= await Quiz.findOne({subject:user.quiz[0]})
+    res.send(quiz)
+  }else {
+    res.status(400).send('Cant find this quiz')
+  }
+
+ 
+
+})
 
 module.exports = router;
