@@ -19,6 +19,7 @@ const authSlice = createSlice({
     isAuthenticated: localStorage.getItem("userData") ? true : false,
     inputValidity: false,
     modal: false,
+    changePasswordToken:false,
   },
   reducers: {
     logout(state) {
@@ -49,6 +50,9 @@ const authSlice = createSlice({
     hideModal(state) {
       state.modal = false;
     },
+    changePasswordTokenHandler(state,action) {
+      state.changePasswordToken=action.payload.token
+    }
   },
 });
 

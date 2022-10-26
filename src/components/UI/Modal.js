@@ -2,9 +2,9 @@ import Card from "./Card";
 import classes from "./Modal.module.css";
 import Button from "./Button";
 import ReactDOM from "react-dom";
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { modalActions } from "../../store/modal";
 import { LoggingIn, Register } from "../../store/auth-actions";
 import { uiActions } from "../../store/ui-actions";
@@ -16,19 +16,18 @@ const Backdrop = (props) => {
 
   const hideModal = () => {
     dispatch(modalActions.closeModal());
-    dispatch(uiActions.hideErrorNotification())
+    dispatch(uiActions.hideErrorAuth());
   };
   return <div className={classes.backdrop} onClick={hideModal} />;
 };
 
 const ModalOverlay = (props) => {
-  const [checkInput, setCheckInput] = useState(true);
   const emailRef = useRef();
   const passwordRef = useRef();
   const nicknameRef = useRef();
   const dispatch = useDispatch();
-  const notification = useSelector((state) => state.ui.notification)
-
+  const notification = useSelector((state) => state.ui.auth);
+  // const notification = useSelector((state) => state.ui.notification)
 
   const googleContent = useSelector(
     (state) => state.modal.modalInfo.googleContent
@@ -47,7 +46,6 @@ const ModalOverlay = (props) => {
 
     if (status === "Sign in") {
       if (emailInput.match(validRegex) && passwordInput.trim().length >= 6) {
-        setCheckInput(true);
         console.log("LoggingIn");
         dispatch(
           LoggingIn({
@@ -57,7 +55,6 @@ const ModalOverlay = (props) => {
         );
         navigate.replace("/");
       } else {
-        setCheckInput(false);
       }
     } else {
       let nicknameInput = nicknameRef.current.value;
@@ -66,7 +63,6 @@ const ModalOverlay = (props) => {
         passwordInput.trim().length >= 6 &&
         nicknameInput.length >= 5
       ) {
-        setCheckInput(true);
         console.log("Registering");
         dispatch(
           Register({
@@ -77,7 +73,12 @@ const ModalOverlay = (props) => {
         );
         navigate.replace("/");
       } else {
-        setCheckInput(false);
+        dispatch(
+          uiActions.errorAuth({
+            message: "Please check your coordinates",
+            status: "error",
+          })
+        );
       }
     }
   };
@@ -120,10 +121,28 @@ const ModalOverlay = (props) => {
             className={classes.input}
           />
         </div>
-        {notification && <div className={classes.error}><p>{notification.message}</p></div>}
-        <Button type="submit" status={status}></Button>
+        {notification && (
+          <div className={classes.error}>
+            <p>{notification.message}</p>
+          </div>
+        )}
+        <Button
+          type="submit"
+          status={status}
+        ></Button>
       </form>
-      <footer className={classes.actions}>forget password</footer>
+      {status === "Sign in" && (
+        <Link
+          to="/forget-password"
+          className={classes.actions}
+          onClick={() => {
+            dispatch(modalActions.closeModal());
+            dispatch(uiActions.hideErrorAuth());
+          }}
+        >
+          Forget password?
+        </Link>
+      )}
     </Card>
   );
 };

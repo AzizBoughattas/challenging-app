@@ -5,6 +5,12 @@ const bcrypt = require('bcrypt')
 const admin = require('../middleware/admin')
 const jwt = require("jsonwebtoken");
 const auth = require('../middleware/auth')
+const sendEmail = require("../email/email");
+const Joi = require('joi')
+
+
+
+ const subject = "Password Reset"
 
 router.post("/", async (req, res) => {
   const { error } = validateUser(req.body);
@@ -38,6 +44,70 @@ router.get("/me",auth,async(req,res) => {
   const user = await User.findOne({ _id :payload._id })
   res.send(user)
 })
+
+router.post("/reset",async(req,res) => {
+  User.findOne({email:req.body.email}).then(async(user) => {
+    if (!user) return res.status(400).send("No Account with that email found");
+    const token = jwt.sign({ _id: user._id },process.env.JWT_SECRET,{expiresIn:"3h"});
+
+
+    const output = `<p>You requested a password reset</p>
+<p>Click this <a href="http://localhost:3000/reset-password/${token}">link</a> to set a new password</p> 
+`;
+ const plainText = `You requested a password reset
+ Click this <a href="http://localhost:3000/reset-password/${token}">link</a> to set a new password
+ `;
+
+    await sendEmail(req.body.email,output,plainText,subject)
+    res.send(token)
+  }).catch((err) => {
+    console.log(err)
+  })
+})
+
+router.post("/new-password/:token",async(req,res)=> {
+  const token =req.params.token
+  if (!token) return res.status(401).send("No token provided");
+  const newPassword = req.body.password
+  const {error} =  validatePassword(req.body)
+
+  if (error) return res.status(400).send(error.details[0].message);
+
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET,{complete: true});
+    const user = await User.findOne({ _id :decoded.payload._id })
+    if(!user) {
+      throw new Error("Invalid token")
+  }
+
+  const result = await bcrypt.compare(req.body.password,user.password)
+
+  if(result) {
+    return res.status(400).send("you cant change with the same Password")
+  }
+  const salt = await bcrypt.genSalt(10);
+  const hashPassword = await bcrypt.hash(newPassword,salt) 
+
+
+
+  user.password=hashPassword
+  await user.save()
+  res.send("success")
+
+  } catch (error) {
+    res.status(400).send("Something went wrong");
+  }
+
+})
+
+function validatePassword(password) {
+  const schema = Joi.object({
+    password: Joi.string().required().min(5),
+  });
+
+  return schema.validate(password);
+}
 
 
 

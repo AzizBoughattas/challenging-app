@@ -137,7 +137,6 @@
   border-radius: 50%;
   background: rgb(145, 143, 143);
   overflow: hidden;
-  background-image: conic-gradient(#d7c49eff 25%, #343148ff 0);
 }
 
 .inner {

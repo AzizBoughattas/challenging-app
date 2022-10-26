@@ -3,6 +3,8 @@ import { Fragment, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, Route, Switch } from "react-router-dom";
 import Admin from "./components/admin/Admin";
+import ChangePassword from "./components/change-password/ChangePassword";
+import ForgetPassword from "./components/forget-password/ForgetPassword";
 import Home from "./components/home/Home";
 import Layout from "./components/navigation/Layout";
 import Profile from "./components/profile/Profile";
@@ -18,11 +20,8 @@ function App() {
   const isAdmin = useSelector((state) => state.auth.isAdmin);
   const notification = useSelector((state) => state.ui.notification);
   const dispatch = useDispatch();
-
   axios.defaults.headers.common["Authorization"] = token;
   axios.defaults.headers.common["Content-Type"] = "application/json";
-
-
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -72,11 +71,27 @@ function App() {
           <Route path="/admin">
             <Layout>
               <main>
-                <Admin notification={notification}/>
+                <Admin notification={notification} />
               </main>
             </Layout>
           </Route>
         )}
+
+          <Route path="/reset-password/:token">
+            <Layout>
+              <main>
+                <ChangePassword />
+              </main>
+            </Layout>
+          </Route>
+
+        <Route path="/forget-password">
+          <Layout>
+            <main>
+              <ForgetPassword />
+            </main>
+          </Layout>
+        </Route>
         <Route path="*">
           <Redirect to="/" />
         </Route>

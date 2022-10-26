@@ -1,11 +1,11 @@
 import classes from "./Profile.module.css";
 import { AiOutlineUser } from "react-icons/ai";
-import {  Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import camera from "../../images/camera.png";
 
 import { Navigation, Pagination, Scrollbar, A11y } from "swiper";
 
-import { Swiper, SwiperSlide,  } from "swiper/react";
+import { Swiper, SwiperSlide } from "swiper/react";
 
 // Import Swiper styles
 import "swiper/css";
@@ -13,51 +13,25 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
 import { useSelector } from "react-redux";
-
-const DUMMY_DATA = [
-  { titre: "java", note: 33 },
-  { titre: "javascript", note: 96 },
-  { titre: "node", note: 80 },
-  { titre: "reactjs", note: 40 },
-  { titre: "spring boot", note: 40 },
-  { titre: "typescript", note: 40 },
-  { titre: "typescript", note: 40 },
-  { titre: "typescript", note: 40 },
-  { titre: "typescript", note: 40 },
-  { titre: "typescript", note: 40 },
-  { titre: "typescript", note: 40 },
-  { titre: "typescript", note: 40 },
-  { titre: "typescript", note: 40 },
-  { titre: "typescript", note: 40 },
-  { titre: "typescript", note: 40 },
-  { titre: "typescript", note: 40 },
-  { titre: "typescript", note: 40 },
-  { titre: "typescript", note: 40 },
-  { titre: "typescript", note: 40 },
-  { titre: "typescript", note: 40 },
-  { titre: "typescript", note: 40 },
-  { titre: "typescript", note: 40 },
-];
-
-const DUMMY_DATA2 = [
-  {name:"user",value:80},
-  {name:"user1",value:45},
-  {name:"boughattasaziz@gmail.com",value:30},
-  {name:"user1",value:29},
-  {name:"user1",value:68},
-  {name:"user1",value:56},
-  {name:"user1",value:56},
-  {name:"user1",value:56},
-  {name:"user1",value:56},
-  {name:"user1",value:56},
-]
+import axios from "axios";
 
 const Profile = (props) => {
   const [file, setFile] = useState("");
   const [image, setImage] = useState("");
-  const email = useSelector((state) => state.auth.email)
+  const email = useSelector((state) => state.auth.email);
+  const nickname = useSelector((state) => state.auth.nickname);
+  const [note, setNote] = useState([]);
+  const [allNotes, setAllNotes] = useState([]);
 
-  console.log(email)
+  useEffect(() => {
+    axios.get("http://localhost:8080/api/quiz/myquiz").then((res) => {
+      console.log(res);
+      setNote(res.data);
+    });
+    axios.get("http://localhost:8080/api/quiz/allquiz").then((res) => {
+      setAllNotes(res.data);
+    });
+  }, []);
 
   useEffect(() => {
     if (file) {
@@ -97,11 +71,17 @@ const Profile = (props) => {
           </div>
           <div className={classes.cordonne}>
             <p>
-              My Email : <input className={classes.input} value={email} readOnly />
+              My Email :{" "}
+              <input className={classes.input} value={email} readOnly />
             </p>
             <p>
-              My Password :
-              <input className={classes.input} type="password" value={email} readOnly />
+              My Nickname :
+              <input
+                className={classes.input}
+                type="text"
+                value={nickname}
+                readOnly
+              />
             </p>
             <button className={classes.button}>Change my password ?</button>
           </div>
@@ -110,37 +90,59 @@ const Profile = (props) => {
           <div className={classes.firstColumn}>
             <div className={classes.test}>
               <p>My Last Result</p>
-              <div className={classes.circle}>
-                <div className={classes.inner}>5/7</div>
-              </div>
+              {note.length !== 0 ? (
+                <div
+                  className={classes.circle}
+                  style={{
+                    backgroundImage: `conic-gradient(#d7c49eff ${
+                      note[note.length - 1].note
+                    }%, #343148ff 0)`,
+                  }}
+                >
+                  <div className={classes.inner}>
+                    {note[note.length - 1].note}%
+                  </div>
+                </div>
+              ) : (
+                <p>neirouz</p>
+              )}
             </div>
-            <Swiper
-              modules={[Navigation, Scrollbar, A11y]}
-              spaceBetween={40}
-              slidesPerView={1}
-              navigation
-              touchRatio={1.5}
-              scrollbar={{ draggable: true }}
-              loop={true}
-              pagination={{ clickable: true }}
-              className={classes.test}
-              onSwiper={(swiper) => console.log(swiper)}
-            >
-              <div className={classes.resultat}>
-                {DUMMY_DATA.map((data, i) => (
-                  <SwiperSlide key={i} className={classes.allo}>
-                    <p>
-                      {data.titre} : {data.note}%
-                    </p>
-                  </SwiperSlide>
-                ))}
-              </div>
-            </Swiper>
-
+            {note.length !== 0 ? (
+              <Swiper
+                modules={[Navigation, Scrollbar, A11y, Pagination]}
+                spaceBetween={40}
+                slidesPerView={1}
+                navigation
+                touchRatio={1.5}
+                loop={true}
+                pagination={{ clickable: true }}
+                className={classes.test}
+                onSwiper={(swiper) => console.log(swiper)}
+              >
+                <div className={classes.resultat}>
+                  {note.map((data, i) => (
+                    <SwiperSlide key={i} className={classes.allo}>
+                      <p>
+                        {data.subject} : {data.note}%
+                      </p>
+                    </SwiperSlide>
+                  ))}
+                </div>
+              </Swiper>
+            ) : (
+              <p className={classes.test}>neirouz</p>
+            )}
             <div className={classes.rank}>
               <p>My Rank</p>
               <div className={classes.progressBar}>
-              {DUMMY_DATA2.map((data,index) => <Fragment key={index} ><p style={{display:"inline"}}>{data.name}:{data.value}%</p><progress value={data.value} max="100">aa</progress></Fragment>)}
+                {allNotes.map((data, index) => (
+                  <Fragment key={index}>
+                    <p style={{ display: "inline" }}>
+                      {data.nickname}:{data.note}%
+                    </p>
+                    <progress value={data.note} max="100"></progress>
+                  </Fragment>
+                ))}
               </div>
             </div>
           </div>

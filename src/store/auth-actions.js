@@ -30,23 +30,22 @@ export const Register = (data) => {
       dispatch(modalActions.closeModal());
 
       console.log(response);
-
-      // dispatch(
-      //   uiActions.showNotification({
-      //     status: "success",
-      //     title: "Success!",
-      //     message: "sent cart data successfully",
-      //   })
-      // );
     } catch (error) {
-      // dispatch(
-      //   uiActions.showNotification({
-      //     status: "error",
-      //     title: "Error!",
-      //     message: "Sending cart data failed!",
-      //   })
-      // );
-      console.log("alo");
+      if (error.response.data) {
+        dispatch(
+          uiActions.errorAuth({
+            status:"error",
+            message:error.response.data
+          })
+        );
+      } else {
+        dispatch(
+          uiActions.errorAuth({
+            message: "An Error has Occured please try later",
+            status:"error",
+          })
+        );
+      }
     }
   };
 };
@@ -61,26 +60,19 @@ export const LoggingIn = (data) => {
       dispatch(authActions.login({ data: response.data }));
       dispatch(modalActions.closeModal());
 
-      // dispatch(
-      //   uiActions.showNotification({
-      //     status: "success",
-      //     title: "Success!",
-      //     message: "sent cart data successfully",
-      //   })
-      // );
     } catch (error) {
       if (error.response.data) {
         dispatch(
-          uiActions.showErrorNotification({
-            message: error.response.data,
-            show: true,
+          uiActions.errorAuth({
+            status:"error",
+            message:error.response.data
           })
         );
       } else {
         dispatch(
-          uiActions.showErrorNotification({
+          uiActions.errorAuth({
             message: "An Error has Occured please try later",
-            show: true,
+            status:"error",
           })
         );
       }

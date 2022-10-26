@@ -36,7 +36,7 @@ const Navigation = (props) => {
   return (
     <header className={classes.header}>
       <Link to="/" className={classes.logo}>
-        #CodingIsAnArt <img src={icon} alt="icon" />
+        #CodingIsAnArt<img src={icon} alt="icon" />
       </Link>
       <nav>
         {!isAuthenticated ? (

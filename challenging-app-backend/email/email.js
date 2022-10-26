@@ -1,20 +1,12 @@
 const nodemailer = require("nodemailer");
 
 // async..await is not allowed in global scope, must use a wrapper
-async function main(userEmails) {
+async function main(userEmails,output,plainText,subject) {
   // Generate test SMTP service account from ethereal.email
   // Only needed if you don't have a real mail account for testing
   //   let testAccount = await nodemailer.createTestAccount();
 
-  const output = `<p>Hello fellow colleaguesl</p>
- <p>I hope this email finds you well</p> 
-  <p>You are invited to pass an assessment. Please check your personal space to access it. Thank you in advance and have a good day.</p>
-  <p>Sincerely
-  </p>`;
-  const plainText = `Hello fellow colleagues,I hope this email finds you well
-  You are invited to pass an assessment. Please check your personal space to access it. Thank you in advance and have a good day.
-  Sincerely
-  `;
+
 
   console.log(userEmails);
 
@@ -33,7 +25,7 @@ async function main(userEmails) {
   let info = await transporter.sendMail({
     from: "Admin <challenging.app@gmail.com>", // sender address
     to: userEmails, // list of receivers
-    subject: "Assessment Invitation", // Subject line
+    subject: subject, // Subject line
     text: plainText, // plain text body
     html: output, // html body
   });
