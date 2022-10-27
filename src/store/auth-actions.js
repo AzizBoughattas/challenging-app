@@ -9,14 +9,7 @@ const config = {
   },
 };
 
-const calculateRemainingTime = () => {
-  const currentTime = new Date().getTime();
-  const adjExpirationTime = new Date().getTime() + 10800000;
 
-  const remainingDuration = adjExpirationTime - currentTime;
-
-  return remainingDuration;
-};
 
 export const Register = (data) => {
   return async (dispatch) => {

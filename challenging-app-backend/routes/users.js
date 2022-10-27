@@ -7,6 +7,8 @@ const jwt = require("jsonwebtoken");
 const auth = require('../middleware/auth')
 const sendEmail = require("../email/email");
 const Joi = require('joi')
+const multer = require('multer')
+const sharp = require('sharp')
 
 
 
@@ -100,6 +102,89 @@ router.post("/new-password/:token",async(req,res)=> {
   }
 
 })
+
+// const fileStorage = multer.diskStorage({
+//   destination:(req,file,cb) => {
+//     cb(null,'images')
+//   },
+//   filename:(req,file,cb) => {
+//     cb(null,Date.now()+'-'+ file.originalname)
+//   }
+// })
+
+
+
+const upload = multer({
+    limits :{
+      fileSize :1000000
+  }, 
+  fileFilter(req,file,cb) {
+      if(!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+          return cb(new Error('Please upload a jpg,jpeg,png image'))
+      }
+      cb(undefined,true)
+  }
+})
+
+router.post('/me/avatar' ,auth, upload.single('image'),async (req,res) => {
+  const token = req.header("Authorization")
+  const decoded = jwt.decode(token)
+  const image = req.file
+  if(!image) return res.status(400).send('Please upload an image')
+  const user = await User.findOne({ _id :decoded._id })
+  console.log(req.file)
+  const buffer =await sharp(req.file.buffer).resize({ width:250 , height:250 }).png().toBuffer()
+
+  user.avatar=buffer
+
+
+
+  await user.save()
+  res.send("success")
+}, (error,req,res,next) => {
+  res.status(400).send({error : error.message})
+})
+
+
+// const upload = multer({
+//   limits :{
+//       fileSize :1000000
+//   }, 
+//   fileFilter(req,file,cb) {
+//       if(!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+//           return cb(new Error('Please upload a jpg,jpeg,png image'))
+//       }
+//       cb(undefined,true)
+//   }
+// })
+
+// router.post('/users/me/avatar' ,auth, upload.single('avatar'),async (req,res) => {
+//   const buffer =await sharp(req.file.buffer).resize({ width:250 , height:250 }).png().toBuffer()
+
+//   req.user.avatar =buffer
+//   await req.user.save()
+//   res.send()
+// }, (error,req,res,next) => {
+//   res.status(400).send({error : error.message})
+// })
+
+
+
+router.get('/me/avatar',auth, async (req,res) => {
+  const token = req.header("Authorization")
+  const decoded = jwt.decode(token)
+  const user = await User.findOne({ _id :decoded._id })
+  try {
+    // if( !user || !user.avatar) {
+    //     throw new Error()
+    // }
+    res.send(user)
+} catch (error) {
+    res.status(404).send(error)
+}
+})
+
+
 
 function validatePassword(password) {
   const schema = Joi.object({

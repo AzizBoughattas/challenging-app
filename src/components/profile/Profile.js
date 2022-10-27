@@ -12,20 +12,27 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
+import Button from "../UI/Button";
+import { uiActions } from "../../store/ui-actions";
 
 const Profile = (props) => {
   const [file, setFile] = useState("");
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState(
+    "https://www.citypng.com/public/uploads/preview/download-black-male-user-profile-icon-png-116371332534k5baafcll.png"
+  );
   const email = useSelector((state) => state.auth.email);
   const nickname = useSelector((state) => state.auth.nickname);
   const [note, setNote] = useState([]);
   const [allNotes, setAllNotes] = useState([]);
+  const [checkRes, setCheckRes] = useState(false);
+  const dispatch = useDispatch()
+
+ 
 
   useEffect(() => {
     axios.get("http://localhost:8080/api/quiz/myquiz").then((res) => {
-      console.log(res);
       setNote(res.data);
     });
     axios.get("http://localhost:8080/api/quiz/allquiz").then((res) => {
@@ -34,14 +41,56 @@ const Profile = (props) => {
   }, []);
 
   useEffect(() => {
+    axios.get("http://localhost:8080/api/users/me/avatar").then((res) => {
+      if (res.data.avatar !== undefined) {
+        setCheckRes(true);
+        console.log(res.data.avatar);
+        setImage(
+          btoa(String.fromCharCode(...new Uint8Array(res.data.avatar.data)))
+        );
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     if (file) {
+      setCheckRes(false)
       setImage(URL.createObjectURL(file));
     }
   }, [file]);
 
   const fileChange = (event) => {
     setFile(event.target.files[0]);
-    console.log(file);
+  };
+
+  const changeAvatarHandler = (e) => {
+    dispatch(
+      uiActions.showNotification({
+        status: "loading",
+        title: "Loading!",
+        message: "isLoading",
+      })
+    );
+    e.preventDefault()
+    const formData = new FormData();
+    console.log(file)
+    formData.append("image", file);
+    axios
+      .post("http://localhost:8080/api/users/me/avatar", formData)
+      .then((res) => {
+        setFile("")
+        console.log(res);
+        dispatch(
+          uiActions.showNotification({
+            status: "success",
+            title: "Success!",
+            message: "your profile image has changed successfully",
+          })
+        );
+        setTimeout(() => {
+          dispatch(uiActions.hideNotification())
+        }, 2000)
+      });
   };
   return (
     <div className={classes.profile}>
@@ -50,12 +99,7 @@ const Profile = (props) => {
       <div className={classes.grids}>
         <div className={classes.leftColumn}>
           <div className={classes.userImage}>
-            <label
-              htmlFor="file-upload"
-              className={classes["custom-file-upload"]}
-            >
-              <img src={camera} alt="camera" className={classes.camera} />
-            </label>
+            <form onSubmit={changeAvatarHandler}>
             <input
               id="file-upload"
               type="file"
@@ -63,11 +107,31 @@ const Profile = (props) => {
               accept="image/*"
               style={{ display: "none" }}
             />
-            {!image ? (
-              <AiOutlineUser className={classes.icon} />
-            ) : (
-              <img className={classes.icon} src={image} alt="ok" />
-            )}
+
+            <div className={classes.image}>
+              <label
+                htmlFor="file-upload"
+                className={classes["custom-file-upload"]}
+              >
+                <img src={camera} alt="camera" className={classes.camera} />
+              </label>
+              <img
+                className={classes.icon}
+                src={!checkRes ? image : `data:image/png;base64,${image}`}
+                alt="ok"
+                width="300"
+              />
+              {file && (
+                <button
+                  className={classes.button}
+                  
+                >
+                  Upload
+                </button>
+              )}
+             
+            </div>
+            </form>
           </div>
           <div className={classes.cordonne}>
             <p>
@@ -117,7 +181,6 @@ const Profile = (props) => {
                 loop={true}
                 pagination={{ clickable: true }}
                 className={classes.test}
-                onSwiper={(swiper) => console.log(swiper)}
               >
                 <div className={classes.resultat}>
                   {note.map((data, i) => (

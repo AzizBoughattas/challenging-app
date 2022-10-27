@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const Joi = require('joi')
-const jwt = require('jsonwebtoken')
+const Joi = require("joi");
+const jwt = require("jsonwebtoken");
 
 const schema = new mongoose.Schema({
   nickname: {
@@ -10,14 +10,24 @@ const schema = new mongoose.Schema({
   },
   email: { type: String, required: true, unique: true, minlength: 5 },
   password: { type: String, required: true, minLength: 5 },
-  isAdmin: {type:Boolean,default:false},
-  notes: {type:Array},
-  quiz:{type:Array}
-});
-schema.methods.generateAuthToken = function() {
-    const token = jwt.sign({ _id: this._id, isAdmin:this.isAdmin },process.env.JWT_SECRET,{expiresIn:"3h"});
-    return token;
+  isAdmin: { type: Boolean, default: false },
+  notes: { type: Array },
+  quiz: { type: Array },
+  avatar : {
+    type:Buffer
 }
+  // imageUrl: {
+  //   type: String,
+  // },
+});
+schema.methods.generateAuthToken = function () {
+  const token = jwt.sign(
+    { _id: this._id, isAdmin: this.isAdmin },
+    process.env.JWT_SECRET,
+    { expiresIn: "3h" }
+  );
+  return token;
+};
 
 const User = mongoose.model("User", schema);
 
@@ -30,8 +40,6 @@ function validateUser(user) {
 
   return schema.validate(user);
 }
-
-
 
 exports.User = User;
 exports.validateUser = validateUser;

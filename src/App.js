@@ -24,6 +24,14 @@ function App() {
   axios.defaults.headers.common["Content-Type"] = "application/json";
 
   useEffect(() => {
+    const calculateRemainingTime = () => {
+      const currentTime = new Date().getTime();
+      const adjExpirationTime = new Date().getTime() + 10800000;
+    
+      const remainingDuration = adjExpirationTime - currentTime;
+    
+      return remainingDuration;
+    };
     if (isAuthenticated) {
       setTimeout(() => {
         dispatch(authActions.logout());

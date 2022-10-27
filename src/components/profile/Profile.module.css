@@ -183,3 +183,11 @@ progress {
   width: 90%;
   margin-left: 1rem;
 }
+
+.image {
+  text-align: center;
+}
+.image > button {
+  margin-left: 10.5rem;
+  margin-top: 1rem;
+}
